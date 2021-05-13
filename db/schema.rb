@@ -10,10 +10,51 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_13_033556) do
+ActiveRecord::Schema.define(version: 2021_05_13_042315) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "byte_tags", force: :cascade do |t|
+    t.bigint "byte_id", null: false
+    t.bigint "tag_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["byte_id"], name: "index_byte_tags_on_byte_id"
+    t.index ["tag_id"], name: "index_byte_tags_on_tag_id"
+  end
+
+  create_table "bytes", force: :cascade do |t|
+    t.string "title"
+    t.text "body"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "folders", force: :cascade do |t|
+    t.string "name"
+    t.bigint "byte_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["byte_id"], name: "index_folders_on_byte_id"
+    t.index ["user_id"], name: "index_folders_on_user_id"
+  end
+
+  create_table "likes", force: :cascade do |t|
+    t.bigint "byte_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["byte_id"], name: "index_likes_on_byte_id"
+    t.index ["user_id"], name: "index_likes_on_user_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -33,4 +74,10 @@ ActiveRecord::Schema.define(version: 2021_05_13_033556) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "byte_tags", "bytes"
+  add_foreign_key "byte_tags", "tags"
+  add_foreign_key "folders", "bytes"
+  add_foreign_key "folders", "users"
+  add_foreign_key "likes", "bytes"
+  add_foreign_key "likes", "users"
 end

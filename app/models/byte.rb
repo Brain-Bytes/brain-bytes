@@ -1,0 +1,2 @@
+class Byte < ApplicationRecord
+end
