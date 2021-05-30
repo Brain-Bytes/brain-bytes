@@ -9,5 +9,6 @@ module Types
     field :title, String, null: false
     field :body, String, null: false
     field :user, Types::UserType, null: false
+    field :tags, [Types::TagType], null: false
   end
 end
