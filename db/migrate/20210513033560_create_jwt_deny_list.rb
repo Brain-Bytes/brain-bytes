@@ -1,10 +1,9 @@
-class CreateByteTags < ActiveRecord::Migration[6.1]
+class CreateJwtDenylist < ActiveRecord::Migration[6.1]
   def change
-    create_table :byte_tags do |t|
-      t.references :byte, null: false, foreign_key: true
-      t.references :tag, null: false, foreign_key: true
-
-      t.timestamps
+    create_table :jwt_denylist do |t|
+      t.string :jti, null: false
+      t.datetime :expired_at, null: false
     end
+    add_index :jwt_denylist, :jti
   end
 end
