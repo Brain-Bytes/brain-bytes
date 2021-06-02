@@ -2,6 +2,7 @@ class Byte < ApplicationRecord
   belongs_to :user
   has_many :byte_tags
   has_many :tags, through: :byte_tags
+  has_many :likes
 
   validates :title, presence: true
   validates :body, presence: true

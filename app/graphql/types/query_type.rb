@@ -11,5 +11,6 @@ module Types
     field :fetch_byte, resolver: Queries::FetchByte
     field :fetch_user, resolver: Queries::FetchUser
     field :fetch_tags, resolver: Queries::FetchTags
+    field :fetch_likes, resolver: Queries::FetchLikes
   end
 end

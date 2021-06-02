@@ -10,5 +10,11 @@ module Types
     field :body, String, null: false
     field :user, Types::UserType, null: false
     field :tags, [Types::TagType], null: false
+    field :likes, [Types::LikeType], null: false
+    field :likes, Integer, null: false
+
+    def likes
+      object.likes.count
+    end
   end
 end
