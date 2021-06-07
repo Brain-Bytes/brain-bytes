@@ -18,4 +18,5 @@ Rails.application.routes.draw do
                sessions: 'sessions',
                registrations: 'registrations'
              }
+  get '/member-data', to: 'members#show'
 end

@@ -1,16 +1,20 @@
 class RegistrationsController < Devise::RegistrationsController
   skip_forgery_protection
+  respond_to :json
 
-  def create
-    build_resource(sign_up_params)
-    p 'SIGN UP PARAMS'
-    p sign_up_params
-    resource.save
-    if resource.save
-      sign_up(resource_name, resource) if resource.persisted?
-      render json: UserSerializer.new(resource).serializable_hash.to_json
-    else
-      render json: { errors: { 'email or password' => ['is invalid'] } }, status: :unprocessable_entity
-    end
+  private
+
+  def respond_with(resource, _opts = {})
+    register_success && return if resource.persisted?
+
+    register_failed
+  end
+
+  def register_success
+    render json: { message: 'Signed up sucessfully.' }
+  end
+
+  def register_failed
+    render json: { message: 'Something went wrong.' }
   end
 end
