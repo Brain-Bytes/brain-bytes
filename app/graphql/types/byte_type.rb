@@ -21,6 +21,8 @@ module Types
       p 'context[:current_user]'
       p context[:current_user]
       user = context[:current_user]
+      return false if user.nil?
+
       like = object.likes.find_by(user_id: user.id)
       like.present?
     end
