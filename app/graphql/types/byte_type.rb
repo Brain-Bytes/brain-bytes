@@ -10,18 +10,19 @@ module Types
     field :body, String, null: false
     field :user, Types::UserType, null: false
     field :tags, [Types::TagType], null: false
-    # field :likes, [Types::LikeType], null: false
     field :likes_count, Integer, null: false
-    # field :liked_by_current_user, Boolean, null: false
+    field :liked_by_current_user, Boolean, null: false
 
     def likes_count
       object.likes.count
     end
 
-    # def liked_by_current_user
-    #   p 'CURRENT USER'
-    #   p current_user
-    #   p 'CURRENT USER'
-    # end
+    def liked_by_current_user
+      p 'context[:current_user]'
+      p context[:current_user]
+      user = context[:current_user]
+      like = object.likes.find_by(user_id: user.id)
+      like.present?
+    end
   end
 end

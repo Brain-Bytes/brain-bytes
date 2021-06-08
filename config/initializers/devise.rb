@@ -312,6 +312,9 @@ Devise.setup do |config|
   config.jwt do |jwt|
     # jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
     jwt.secret = 'dccc46bc5e8eb1c5250f859edbd2bbf83957b515ef43fd6569c2e2e7c1bb0578f4a1b0a8ef21a2b18bc07ad3d0405fbeb1e152b43b70657a18f4c3ad93b405ef'
+    jwt.request_formats = {
+      user: [nil, :json]
+    }
     jwt.dispatch_requests = [
       ['POST', %r{^/api/login$}]
     ]
