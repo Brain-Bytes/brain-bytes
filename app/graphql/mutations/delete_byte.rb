@@ -8,7 +8,7 @@ module Mutations
       byte = Byte.find(id)
 
       begin
-        byte.delete
+        byte.destroy
 
         # The resolve method in a mutation must return a hash whose symbol matches the field names
         { byte: byte }
