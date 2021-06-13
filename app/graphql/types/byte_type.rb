@@ -18,8 +18,6 @@ module Types
     end
 
     def liked_by_current_user
-      p 'context[:current_user]'
-      p context[:current_user]
       user = context[:current_user]
       return false if user.nil?
 

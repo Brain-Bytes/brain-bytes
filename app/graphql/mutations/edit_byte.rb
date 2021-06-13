@@ -9,7 +9,7 @@ module Mutations
       byte_params = Hash params
 
       begin
-        byte = Byte.find(id)
+        byte = Byte.find_by!(id: id, user_id: context[:current_user].id)
         byte.update!(byte_params)
 
         # The resolve method in a mutation must return a hash whose symbol matches the field names

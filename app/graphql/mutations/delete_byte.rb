@@ -5,7 +5,7 @@ module Mutations
     field :byte, Types::ByteType, null: false
 
     def resolve(id:)
-      byte = Byte.find(id)
+      byte = Byte.find_by!(id: id, user_id: context[:current_user].id)
 
       begin
         byte.destroy
