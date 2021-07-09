@@ -15,6 +15,6 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def register_failed
-    render json: { message: 'Something went wrong.' }
+    render json: { message: resource.errors.full_messages.to_sentence }, status: 404
   end
 end

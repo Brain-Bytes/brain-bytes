@@ -1,5 +1,5 @@
 class Api::BaseController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, unless: :devise_controller?
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
