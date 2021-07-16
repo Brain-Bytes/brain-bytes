@@ -10,7 +10,7 @@ class GraphqlController < ApplicationController
     operation_name = params[:operationName]
     context = {
       # Query context goes here, for example:
-      current_user: current_user
+      current_user: check_current_user
     }
     result = BrainBytesBackendSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
@@ -47,5 +47,24 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+  end
+
+  private
+
+  def check_current_user
+    current_user
+    if request.headers['Authorization'] != "null"
+      token = request.headers['Authorization']&.split('Bearer ')&.last
+      decoded_token = JWT.decode(token, ENV["DEVISE_JWT_SECRET_KEY"], true, verify_iat: true)[0]
+      user_id = decoded_token["sub"]
+      user = User.find(user_id)
+      current_user = user
+    else
+      current_user = nil
+    end
+    current_user
+
+  rescue StandardError
+    "Something went wrong"
   end
 end
