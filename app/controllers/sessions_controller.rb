@@ -5,7 +5,10 @@ class SessionsController < Devise::SessionsController
   private
 
   def respond_with(_resource, _opts = {})
-    render json: { message: 'You are logged in.', userId: current_user.id }, status: :ok
+    if !current_user.refresh_token
+      RefreshToken.create!(user: current_user)
+    end
+    render json: { message: 'You are logged in.', userId: current_user.id, refreshToken: current_user.refresh_token.crypted_token }, status: :ok
   end
 
   def respond_to_on_destroy

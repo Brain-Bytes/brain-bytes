@@ -6,6 +6,7 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
   has_many :bytes
+  has_one :refresh_token, dependent: :destroy
 
   validates :username, presence: true
   validates :username, uniqueness: true

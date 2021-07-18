@@ -13,6 +13,8 @@ class GraphqlController < ApplicationController
       current_user: check_current_user
     }
     result = BrainBytesBackendSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+    # byebug
+    # response.set_header("Header-Name", "Header value")
     render json: result
   rescue StandardError => e
     raise e unless Rails.env.development?
@@ -52,19 +54,43 @@ class GraphqlController < ApplicationController
   private
 
   def check_current_user
-    current_user
-    if request.headers['Authorization'] != "null"
-      token = request.headers['Authorization']&.split('Bearer ')&.last
-      decoded_token = JWT.decode(token, ENV["DEVISE_JWT_SECRET_KEY"], true, verify_iat: true)[0]
-      user_id = decoded_token["sub"]
-      user = User.find(user_id)
-      current_user = user
-    else
-      current_user = nil
+    if authorization_headers_present
+      begin
+        token = authorization_header
+        decoded_token = JWT.decode(token, ENV["DEVISE_JWT_SECRET_KEY"], true, verify_iat: true)[0]
+        user_id = get_user_id_from_token(decoded_token)
+        user = User.find(user_id)
+      rescue JWT::ExpiredSignature
+        refresh_token = params[:refresh_token]
+        user = RefreshToken.find_by(crypted_token: refresh_token).user
+        new_jwt_token = issue_new_jwt_token(user.id)
+        response.set_header("Authorization", new_jwt_token)
+        user
+      end
     end
-    current_user
-
-  rescue StandardError
-    "Something went wrong"
   end
+
+  def authorization_headers_present
+    request.headers['Authorization'] && request.headers['Authorization'] != "null"
+  end
+
+  def authorization_header
+    request.headers['Authorization']&.split('Bearer ')&.last
+  end
+
+  def get_user_id_from_token(decoded_token)
+    decoded_token["sub"] || decoded_token["user_id"]
+  end
+
+  def issue_new_jwt_token(user_id)
+    JWT.encode(
+      {
+        user_id: user_id,
+        iat: Time.now.to_i,
+        exp: (Time.now + 2.hours).to_i,
+      },
+      ENV["DEVISE_JWT_SECRET_KEY"]
+    )
+  end
+
 end
