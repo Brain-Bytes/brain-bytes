@@ -13,8 +13,6 @@ class GraphqlController < ApplicationController
       current_user: check_current_user
     }
     result = BrainBytesBackendSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
-    # byebug
-    # response.set_header("Header-Name", "Header value")
     render json: result
   rescue StandardError => e
     raise e unless Rails.env.development?

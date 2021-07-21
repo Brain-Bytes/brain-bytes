@@ -5,7 +5,7 @@ module Queries
     type [Types::ByteType], null: false
 
     def resolve
-      Byte.all.order(created_at: :desc)
+      Byte.all.order(created_at: :desc).limit(10)
     end
   end
 end
