@@ -5,9 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import Button from '../reusables/Button';
 
 const Navbar = (props: any) => {
-  const { toggleSlidebar } = props;
 
-  let history =  useHistory();
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -18,7 +16,7 @@ const Navbar = (props: any) => {
     setUserLoggedIn(false);
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    history.push('/');
+    location.reload();
   };
 
   return (

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { print } from 'graphql';
 
-export const getBytes = async () => {
+export const getBytes = async (setBytes, setError) => {
   const response = await axios({
     url: `graphql`,
     method: 'post',
@@ -29,44 +29,9 @@ export const getBytes = async () => {
     },
     headers: { Authorization: localStorage.getItem('token') },
   });
-
-  return response;
 };
 
-export const getBytesFromFolder = async (id) => {
-  const response = await axios({
-    url: `graphql`,
-    method: 'post',
-    data: {
-      refresh_token: localStorage.getItem('refreshToken'),
-      query: `
-        query {
-          fetchBytes {
-            id
-            title
-            body
-            createdAt
-            user {
-              id
-              username
-            }
-            tags {
-              name
-            }
-            likesCount
-            likedByCurrentUser
-            saved
-          }
-        }
-      `,
-    },
-    headers: { Authorization: localStorage.getItem('token') },
-  });
-
-  return response;
-};
-
-export const getOlderBytes = async (lastByteId) => {
+export const getOlderBytes = async (lastByteId, bytes, setBytes, setHasMoreBytesToLoad) => {
   const response = await axios({
     url: `graphql`,
     method: 'post',
@@ -95,7 +60,11 @@ export const getOlderBytes = async (lastByteId) => {
     headers: { Authorization: localStorage.getItem('token') },
   });
 
-  return response;
+  const olderBytes = response.data.data.fetchOlderBytes;
+  if (olderBytes.length === 0) return setHasMoreBytesToLoad(false);
+
+  const copyBytes = [...bytes];
+  setBytes([...copyBytes, ...olderBytes]);
 };
 
 export const addByte = async (ADD_BYTE_MUTATION, variables) => {
@@ -113,7 +82,7 @@ export const addByte = async (ADD_BYTE_MUTATION, variables) => {
   return response;
 };
 
-export const deleteByte = async (byteId) => {
+export const deleteByte = async (byteId, bytes, setBytes) => {
   const response = await axios({
     url: `graphql`,
     method: 'post',
@@ -134,10 +103,13 @@ export const deleteByte = async (byteId) => {
     headers: { Authorization: localStorage.getItem('token') },
   });
 
-  return response;
+  const copyBytes = [...bytes];
+  const index = copyBytes.findIndex((byte) => Number(byte.id) === Number(byteId));
+  copyBytes.splice(index, 1);
+  setBytes(copyBytes);
 };
 
-export const toggleLike = async (byteId, userId) => {
+export const toggleLike = async (byteId, userId, bytes, setBytes) => {
   const response = await axios({
     url: `graphql`,
     method: 'post',
@@ -158,5 +130,11 @@ export const toggleLike = async (byteId, userId) => {
     headers: { Authorization: localStorage.getItem('token') },
   });
 
-  return response;
+  const likedByte = response.data.data.toggleLike.byte;
+  const { id, likesCount, likedByCurrentUser } = likedByte;
+  const copyBytes = [...bytes];
+  const index = copyBytes.findIndex((_byte) => _byte.id === id);
+  copyBytes[index].likesCount = likesCount;
+  copyBytes[index].likedByCurrentUser = likedByCurrentUser;
+  setBytes(copyBytes);
 };

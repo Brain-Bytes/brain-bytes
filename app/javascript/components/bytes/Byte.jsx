@@ -1,7 +1,7 @@
 import React from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBrain, faPenAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBrain, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 const Byte = ({ byte, handleLikeByte, handleDeleteByte }) => {
   const isByteAuthor = byte.user.id === localStorage.getItem('userId');
@@ -18,7 +18,6 @@ const Byte = ({ byte, handleLikeByte, handleDeleteByte }) => {
         <span className="text-xs">posted on {new Date(byte.createdAt).toDateString()} by {byte.user.username}</span>
         { isByteAuthor && (
           <div className='hidden md:block'>
-            <FontAwesomeIcon className="mr-2 cursor-pointer" icon={faPenAlt} onClick={handleOpenEdit} />
             <FontAwesomeIcon className="mr-2 cursor-pointer" icon={faTrashAlt} onClick={showAlertBeforeDeletingByte} />
           </div>
         )}

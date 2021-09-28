@@ -5,7 +5,6 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Spinner from 'react-bootstrap/Spinner';
 import Navbar from '../navigation/Navbar';
 import Byte from '../bytes/Byte';
-import { CancelIcon } from '../reusables/icons/icons';
 
 // Services
 import { getBytes, deleteByte, toggleLike, getOlderBytes, getBytesFromFolder } from '../services/ByteService';
@@ -15,99 +14,36 @@ const Home = () => {
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [byteSavingMode, setByteSavingMode] = useState({
-    isActive: false,
-    byteId: null,
-  });
   const [bytes, setBytes] = useState<any[]>([]);
   const [hasMoreBytesToLoad, setHasMoreBytesToLoad] = useState(true);
-  const [openedFolder, setOpenedFolder] = useState('');
-  const [isSlidebarOpen, setIsSlidebarOpen] = useState(false);
 
-  const toggleSlidebar = () => setIsSlidebarOpen(!isSlidebarOpen);
+  const handleSetBytes = (newState: {}[]) => setBytes(newState);
 
   useEffect(() => {
     setIsLoading(true);
-    getBytes()
-      .then((res) => {
-        const bytes = res.data.data.fetchBytes
-        setBytes(bytes);
-      })
-      .catch(() => setError('Server error'))
+    getBytes(handleSetBytes)
+      .catch(() => setError("Something went wrong. You'd better reload the page!"))
       .finally(() => setIsLoading(false))
   }, []);
 
   const addOlderBytes = () => {
-    const lastByte = bytes[bytes.length - 1]
-    const lastByteId = lastByte.id;
-    getOlderBytes(lastByteId)
-      .then((res) => {
-        const olderBytes = res.data.data.fetchOlderBytes;
-        if (olderBytes.length === 0) return setHasMoreBytesToLoad(false);
-
-        const copyBytes = [...bytes];
-        setBytes([...copyBytes, ...olderBytes]);
-      })
-      .catch((error) => console.log('error', error))
+    const { id: lastByteId} = bytes[bytes.length - 1]
+    getOlderBytes(lastByteId, bytes, handleSetBytes, setHasMoreBytesToLoad)
+      .catch(() => setError("Something went wrong. You'd better reload the page!"));
   };
 
-  const handleSetBytes = (newState: any) => setBytes(newState);
 
   const handleDeleteByte = (byteId: number) => {
-    deleteByte(byteId)
-      .then(
-        (res) => {
-          const byteId = parseInt(res.data.data.deleteByte.byte.id);
-          const copyBytes = [...bytes];
-          const index = copyBytes.findIndex((byte) => parseInt(byte.id, 10) === byteId);
-          copyBytes.splice(index, 1);
-          setBytes(copyBytes);
-        },
-        (error) => console.log('error', error),
-      )
+    deleteByte(byteId, bytes, handleSetBytes)
+      .catch(() => setError("Something went wrong. You'd better reload the page!"));
   };
 
   const handleLikeByte = (byteId: number) => {
     if (!localStorage.getItem('token')) return history.push('/login');
+    const userId = localStorage.getItem('userId');
 
-    toggleLike(byteId, localStorage.getItem('userId'))
-      .then((response) => {
-        const likedByte = response.data.data.toggleLike.byte;
-        const copyBytes = [...bytes];
-        const index = copyBytes.findIndex((_byte) => _byte.id === likedByte.id);
-        copyBytes[index].likesCount = likedByte.likesCount;
-        copyBytes[index].likedByCurrentUser = likedByte.likedByCurrentUser;
-        handleSetBytes(copyBytes);
-      })
-      .catch((error) => console.log('error', error));
-  };
-
-
-  const openFolder = (id: number, name: string) => {
-    if (window.innerWidth < 768) toggleSlidebar();
-    if (openedFolder) setOpenedFolder('');
-    setIsLoading(true);
-
-    getBytesFromFolder(id)
-      .then((res) => {
-        const bytes = res.data.data.fetchBytes.slice(0,2);
-        setBytes(bytes);
-        setOpenedFolder(name);
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false))
-  };
-
-  const closeFolder = () => {
-    setOpenedFolder('');
-    setIsLoading(true);
-    getBytes()
-      .then((res) => {
-        const bytes = res.data.data.fetchBytes
-        setBytes(bytes);
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false))
+    toggleLike(byteId, userId, bytes, handleSetBytes)
+      .catch(() => setError("Something went wrong. You'd better reload the page!"));
   };
 
   return (
@@ -122,12 +58,6 @@ const Home = () => {
             </Spinner>
           :
             <div>
-              {openedFolder && (
-                <div className='inline-block px-2 mb-4 border-2 rounded border-green-light'>
-                  <span>{openedFolder}</span>
-                  <CancelIcon onClick={closeFolder} className='ml-2' />
-                </div>
-              )}
               <InfiniteScroll
                 dataLength={bytes.length}
                 next={addOlderBytes}
